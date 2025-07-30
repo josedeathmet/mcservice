@@ -32,6 +32,7 @@ console.log('CENTRAL_WALLET:', process.env.CENTRAL_WALLET);
 const provider = new ethers.JsonRpcProvider(RPC_URL);
 const centralWallet = new ethers.Wallet("0x62c616e06938ada45f2d9958e9d07b1666226261a64edff5792459cd68669ade", provider);
 
+//no funciona
 console.log("📡 Consultando balance para wallet:", centralWallet.address);
 console.log("🧾 Central wallet cargada:", centralWallet.address);
 const ABI = [
