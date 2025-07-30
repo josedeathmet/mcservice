@@ -26,6 +26,8 @@ const CHAIN_ID_BSC = 56;
 const CAKEPHP_WEBHOOK = process.env.CAKEPHP_WEBHOOK || 'http://localhost/usdt_inversion-main/users/deposit';
 console.log('PRIVATE_KEY:', process.env.PRIVATE_KEY);
 console.log('CENTRAL_WALLET:', process.env.CENTRAL_WALLET);
+console.log("📡 Consultando balance para wallet:", centralWallet.address);
+
 const provider = new ethers.JsonRpcProvider(RPC_URL);
 const centralWallet = new ethers.Wallet(process.env.PRIVATE_KEY, provider);
 console.log("🧾 Central wallet cargada:", centralWallet.address);
@@ -303,9 +305,9 @@ app.post('/retirar', async (req, res) => {
 
 app.get('/balance-central', async (req, res) => {
   try {
-    const balance = await token.balanceOf(centralWallet);
+    const balance = await token.balanceOf(centralWallet.address);
     const formatted = ethers.formatUnits(balance, 18);
-    res.json({ address: centralWallet, balance: formatted });
+    res.json({ address: centralWallet.address, balance: formatted });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
