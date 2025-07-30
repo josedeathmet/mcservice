@@ -310,7 +310,7 @@ app.post('/retirar', async (req, res) => {
 
 app.get('/balance', async (req, res) => {
   try {
-    const balance = await token.balanceOf(centralWallet.address);
+    const balance = await token.balanceOf(PRIVATE_KEY, provider);
     const formatted = ethers.formatUnits(balance, 18);
     res.json({ address: centralWallet.address, balance: formatted });
   } catch (error) {
