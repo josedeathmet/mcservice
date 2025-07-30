@@ -7,6 +7,7 @@ import { ethers } from 'ethers';
 import { db, ref, set, get, child } from './firebase.js';  // import firebase
 
 dotenv.config();
+console.log("🔐 PRIVATE_KEY cargada:", process.env.PRIVATE_KEY);
 
 const app = express();
 app.use(cors());
