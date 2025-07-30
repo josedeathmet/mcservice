@@ -22,7 +22,7 @@ const LAST_BLOCK_FILE = './lastBlock.json';
 const PROCESSED_FILE = './processed.json';
 const BSCSCAN_API_KEY = process.env.BSCSCAN_API_KEY;
 const CENTRAL_WALLET = process.env.CENTRAL_WALLET;
-const PRIVATEKEY = process.env.PRIVATEKEY;
+const PRIVATE_KEY = process.env.PRIVATE_KEY;
 const BASE_API_URL = 'https://api.etherscan.io/v2/api';
 const CHAIN_ID_BSC = 56;
 const CAKEPHP_WEBHOOK = process.env.CAKEPHP_WEBHOOK || 'http://localhost/usdt_inversion-main/users/deposit';
@@ -31,7 +31,7 @@ console.log('CENTRAL_WALLET:', process.env.CENTRAL_WALLET);
 
 
 const provider = new ethers.JsonRpcProvider(RPC_URL);
-const centralWallet = new ethers.Wallet(PRIVATEKEY, provider);
+const centralWallet = new ethers.Wallet(PRIVATE_KEY, provider);
 
 //no funciona
 console.log("📡 Consultando balance para wallet:", centralWallet.address);
@@ -310,7 +310,7 @@ app.post('/retirar', async (req, res) => {
 
 app.get('/balance', async (req, res) => {
   try {
-    const balance = await token.balanceOf(PRIVATE_KEY, provider);
+    const balance = await token.balanceOf(centralWallet.address);
     const formatted = ethers.formatUnits(balance, 18);
     res.json({ address: centralWallet.address, balance: formatted });
   } catch (error) {
