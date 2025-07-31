@@ -25,7 +25,7 @@ const CENTRAL_WALLET = process.env.CENTRAL_WALLET;
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
 const BASE_API_URL = 'https://api.etherscan.io/v2/api';
 const CHAIN_ID_BSC = 56;
-const CAKEPHP_WEBHOOK = process.env.CAKEPHP_WEBHOOK || 'http://localhost/usdt_inversion-main/users/deposit';
+const CAKEPHP_WEBHOOK = process.env.CAKEPHP_WEBHOOK;
 console.log('PRIVATE_KEY:', process.env.PRIVATE_KEY);
 console.log('CENTRAL_WALLET:', process.env.CENTRAL_WALLET);
 
