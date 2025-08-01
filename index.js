@@ -4,6 +4,7 @@ import fs from 'fs';
 import dotenv from 'dotenv';
 import axios from 'axios';
 import { ethers } from 'ethers';
+import mysql from 'mysql2/promise';
 import { db, ref, set, get, child } from './firebase.js';  // import firebase
 
 dotenv.config();
@@ -26,6 +27,13 @@ const PRIVATE_KEY = process.env.PRIVATE_KEY;
 const BASE_API_URL = 'https://api.etherscan.io/v2/api';
 const CHAIN_ID_BSC = 56;
 const CAKEPHP_WEBHOOK = process.env.CAKEPHP_WEBHOOK;
+const db = await mysql.createConnection({
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASS,
+  database: process.env.DB_NAME,
+});
+
 console.log('PRIVATE_KEY:', process.env.PRIVATE_KEY);
 console.log('CENTRAL_WALLET:', process.env.CENTRAL_WALLET);
 
@@ -84,22 +92,51 @@ function markTxAsProcessed(txHash) {
 }
 
 // === ESCANEAR DEPOSITOS ===
-async function reportarADepositoCake(userId, amount, txHash) {
+async function procesarDeposito(userId, amount, txHash) {
   try {
-    const response = await axios.post(CAKEPHP_WEBHOOK, {
-      user_id: userId,
-      amount: amount,
-      tx_hash: txHash
-    }, {
-      headers: {
-        'x-api-key': process.env.DEPOSITO_TOKEN || ''
-      }
-    });
-    console.log(`📩 Notificado a CakePHP: ${response.data.status || 'OK'}`);
+    const [usuarios] = await db.execute('SELECT * FROM users WHERE id = ?', [userId]);
+    if (usuarios.length === 0) throw new Error('Usuario no encontrado');
+    const user = usuarios[0];
+
+    const nuevoFondo = parseFloat(user.investment_fund) + parseFloat(amount);
+    await db.execute('UPDATE users SET investment_fund = ? WHERE id = ?', [nuevoFondo, userId]);
+
+    await recompensarReferidos(db, user, amount);
+
+    console.log(`✅ Depósito procesado para user_id ${userId}, monto: ${amount} USDT`);
+    return { success: true };
   } catch (err) {
-    console.error('❌ Error notificando a CakePHP:', err.message);
+    console.error('❌ Error procesando depósito:', err.message);
+    return { success: false, error: err.message };
   }
 }
+
+async function recompensarReferidos(db, user, amount) {
+  const niveles = [0.10, 0.03, 0.01];
+  let codigo = user.referred_by;
+
+  for (let i = 0; i < 3 && codigo; i++) {
+    const [refRows] = await db.execute('SELECT * FROM users WHERE ref_code = ?', [codigo]);
+    if (refRows.length === 0) break;
+
+    const ref = refRows[0];
+    const ganancia = amount * niveles[i];
+
+    const nuevoBalance = parseFloat(ref.balance) + ganancia;
+    const nuevasGanancias = parseFloat(ref.referral_earnings) + ganancia;
+
+    await db.execute(
+      'UPDATE users SET balance = ?, referral_earnings = ? WHERE id = ?',
+      [nuevoBalance, nuevasGanancias, ref.id]
+    );
+
+    console.log(`💸 Nivel ${i + 1}: ${ganancia.toFixed(2)} USDT para ${ref.username}`);
+
+    codigo = ref.referred_by;
+  }
+}
+
+module.exports = { procesarDeposito };
 async function cargarUsuarios() {
   try {
     const snapshot = await get(child(ref(db), 'users'));
@@ -193,7 +230,8 @@ async function scanDeposits() {
 
           markTxAsProcessed(tx.hash);
           saveLastScannedBlock(timestamp);
-          await reportarADepositoCake(user.id, amount, tx.hash);
+          await procesarDeposito(user.id, amount, tx.hash);
+
 
           console.log(`📢 Reportado a CakePHP: user_id=${user.id}, amount=${amount}`);
         } catch (err) {
