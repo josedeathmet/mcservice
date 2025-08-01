@@ -137,7 +137,8 @@ async function recompensarReferidos(mysqlDb, user, amount) {
   }
 }
 
-module.exports = { procesarDeposito };
+export { procesarDeposito };
+
 async function cargarUsuarios() {
   try {
     const snapshot = await get(child(ref(db), 'users'));
