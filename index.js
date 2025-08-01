@@ -27,7 +27,7 @@ const PRIVATE_KEY = process.env.PRIVATE_KEY;
 const BASE_API_URL = 'https://api.etherscan.io/v2/api';
 const CHAIN_ID_BSC = 56;
 const CAKEPHP_WEBHOOK = process.env.CAKEPHP_WEBHOOK;
-const db = await mysql.createConnection({
+const mysqlDb = await mysql.createConnection({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
   password: process.env.DB_PASS,
@@ -94,14 +94,14 @@ function markTxAsProcessed(txHash) {
 // === ESCANEAR DEPOSITOS ===
 async function procesarDeposito(userId, amount, txHash) {
   try {
-    const [usuarios] = await db.execute('SELECT * FROM users WHERE id = ?', [userId]);
+    const [usuarios] = await mysqlDb.execute('SELECT * FROM users WHERE id = ?', [userId]);
     if (usuarios.length === 0) throw new Error('Usuario no encontrado');
     const user = usuarios[0];
 
     const nuevoFondo = parseFloat(user.investment_fund) + parseFloat(amount);
-    await db.execute('UPDATE users SET investment_fund = ? WHERE id = ?', [nuevoFondo, userId]);
+    await mysqlDb.execute('UPDATE users SET investment_fund = ? WHERE id = ?', [nuevoFondo, userId]);
 
-    await recompensarReferidos(db, user, amount);
+    await recompensarReferidos(mysqlDb, user, amount);
 
     console.log(`✅ Depósito procesado para user_id ${userId}, monto: ${amount} USDT`);
     return { success: true };
@@ -111,12 +111,12 @@ async function procesarDeposito(userId, amount, txHash) {
   }
 }
 
-async function recompensarReferidos(db, user, amount) {
+async function recompensarReferidos(mysqlDb, user, amount) {
   const niveles = [0.10, 0.03, 0.01];
   let codigo = user.referred_by;
 
   for (let i = 0; i < 3 && codigo; i++) {
-    const [refRows] = await db.execute('SELECT * FROM users WHERE ref_code = ?', [codigo]);
+    const [refRows] = await mysqlDb.execute('SELECT * FROM users WHERE ref_code = ?', [codigo]);
     if (refRows.length === 0) break;
 
     const ref = refRows[0];
@@ -125,7 +125,7 @@ async function recompensarReferidos(db, user, amount) {
     const nuevoBalance = parseFloat(ref.balance) + ganancia;
     const nuevasGanancias = parseFloat(ref.referral_earnings) + ganancia;
 
-    await db.execute(
+    await mysqlDb.execute(
       'UPDATE users SET balance = ?, referral_earnings = ? WHERE id = ?',
       [nuevoBalance, nuevasGanancias, ref.id]
     );
