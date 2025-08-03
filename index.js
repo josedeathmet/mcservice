@@ -63,6 +63,23 @@ function getLastScannedBlock() {
   }
   return 0;
 }
+async function reportarADepositoCake(userId, amount, txHash) {
+  try {
+    const response = await axios.post(CAKEPHP_WEBHOOK, {
+      user_id: userId,
+      amount: amount,
+      tx_hash: txHash
+    }, {
+      headers: {
+        'x-api-key': process.env.DEPOSITO_TOKEN || ''
+      }
+    });
+    console.log(`📩 Notificado a CakePHP: ${response.data.status || 'OK'}`);
+  } catch (err) {
+    console.error('❌ Error notificando a CakePHP:', err.message);
+  }
+}
+
 async function enviarBNBAUsuario(user, cantidad = 0.0001) {
   try {
     const balanceBNB = await provider.getBalance(user.address);
@@ -93,51 +110,7 @@ function markTxAsProcessed(txHash) {
 }
 
 // === ESCANEAR DEPOSITOS ===
-async function procesarDeposito(userId, amount, txHash) {
-  try {
-    const [usuarios] = await mysqlDb.execute('SELECT * FROM users WHERE id = ?', [userId]);
-    if (usuarios.length === 0) throw new Error('Usuario no encontrado');
-    const user = usuarios[0];
 
-    const nuevoFondo = parseFloat(user.investment_fund) + parseFloat(amount);
-    await mysqlDb.execute('UPDATE users SET investment_fund = ? WHERE id = ?', [nuevoFondo, userId]);
-
-    await recompensarReferidos(mysqlDb, user, amount);
-
-    console.log(`✅ Depósito procesado para user_id ${userId}, monto: ${amount} USDT`);
-    return { success: true };
-  } catch (err) {
-    console.error('❌ Error procesando depósito:', err.message);
-    return { success: false, error: err.message };
-  }
-}
-
-async function recompensarReferidos(mysqlDb, user, amount) {
-  const niveles = [0.10, 0.03, 0.01];
-  let codigo = user.referred_by;
-
-  for (let i = 0; i < 3 && codigo; i++) {
-    const [refRows] = await mysqlDb.execute('SELECT * FROM users WHERE ref_code = ?', [codigo]);
-    if (refRows.length === 0) break;
-
-    const ref = refRows[0];
-    const ganancia = amount * niveles[i];
-
-    const nuevoBalance = parseFloat(ref.balance) + ganancia;
-    const nuevasGanancias = parseFloat(ref.referral_earnings) + ganancia;
-
-    await mysqlDb.execute(
-      'UPDATE users SET balance = ?, referral_earnings = ? WHERE id = ?',
-      [nuevoBalance, nuevasGanancias, ref.id]
-    );
-
-    console.log(`💸 Nivel ${i + 1}: ${ganancia.toFixed(2)} USDT para ${ref.username}`);
-
-    codigo = ref.referred_by;
-  }
-}
-
-export { procesarDeposito };
 
 async function cargarUsuarios() {
   try {
@@ -232,7 +205,7 @@ async function scanDeposits() {
 
           markTxAsProcessed(tx.hash);
           saveLastScannedBlock(timestamp);
-          await procesarDeposito(user.id, amount, tx.hash);
+          await reportarADepositoCake(user.id, amount, tx.hash);
 
 
           console.log(`📢 Reportado a CakePHP: user_id=${user.id}, amount=${amount}`);
