@@ -375,13 +375,13 @@ app.post('/retirar-bnb-central', async (req, res) => {
     res.status(500).json({ status: 'error', message: err.message });
   }
 });
-app.get('/', (req, res) => {
-  res.send('✅ Microservicio corriendo correctamente');
-});
+
 
 // === INICIAR SERVIDOR ===
 const PORT = process.env.PORT || 3001;
-
+app.get('/', (req, res) => {
+  res.send('✅ Microservicio corriendo correctamente');
+});
 app.listen(PORT, () => {
   console.log(`✅ Microservicio corriendo en http://localhost:${PORT}`);
 });
