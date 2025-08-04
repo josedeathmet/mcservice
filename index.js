@@ -63,6 +63,7 @@ function getLastScannedBlock() {
   }
   return 0;
 }
+// reorta deposito
 async function reportarADepositoCake(userId, amount, txHash) {
   try {
     const response = await axios.post(CAKEPHP_WEBHOOK, {
@@ -373,3 +374,4 @@ app.post('/retirar-bnb-central', async (req, res) => {
 app.listen(3001, () => {
   console.log('✅ Microservicio corriendo en http://localhost:3001');
 });
+   
