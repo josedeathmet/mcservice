@@ -4,8 +4,19 @@ import fs from 'fs';
 import dotenv from 'dotenv';
 import axios from 'axios';
 import { ethers } from 'ethers';
+import { db, ref, get, child } from './firebase.js';
 
-import { db, ref, set, get, child } from './firebase.js';  // import firebase
+const testFirebase = async () => {
+  try {
+    const snapshot = await get(child(ref(db), 'test'));
+    console.log('✅ Firebase test snapshot:', snapshot.exists() ? snapshot.val() : 'No data');
+  } catch (error) {
+    console.error('❌ Error accediendo Firebase:', error);
+  }
+};
+
+testFirebase();
+
 import 'dotenv/config';
 dotenv.config();
 console.log("🔐 PRIVATE_KEY cargada:", process.env.PRIVATE_KEY);
