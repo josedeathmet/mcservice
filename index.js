@@ -43,7 +43,8 @@ const CAKEPHP_WEBHOOK = process.env.CAKEPHP_WEBHOOK;
 console.log('PRIVATE_KEY:', process.env.PRIVATE_KEY);
 console.log('CENTRAL_WALLET:', process.env.CENTRAL_WALLET);
 
-
+console.log("🔧 Entorno:", process.env.NODE_ENV);
+console.log("🌐 Puerto usado:", process.env.PORT);
 const provider = new ethers.JsonRpcProvider(RPC_URL);
 const centralWallet = new ethers.Wallet(PRIVATE_KEY, provider);
 
