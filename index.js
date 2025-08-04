@@ -6,7 +6,7 @@ import axios from 'axios';
 import { ethers } from 'ethers';
 import mysql from 'mysql2/promise';
 import { db, ref, set, get, child } from './firebase.js';  // import firebase
-
+import 'dotenv/config';
 dotenv.config();
 console.log("🔐 PRIVATE_KEY cargada:", process.env.PRIVATE_KEY);
 
