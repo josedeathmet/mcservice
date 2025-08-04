@@ -4,7 +4,7 @@ import fs from 'fs';
 import dotenv from 'dotenv';
 import axios from 'axios';
 import { ethers } from 'ethers';
-import { db, ref, get, child } from './firebase.js';
+import { db, ref, get, child , set } from './firebase.js';
 
 const testFirebase = async () => {
   try {

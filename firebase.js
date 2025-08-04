@@ -11,7 +11,7 @@ const firebaseConfig = {
   messagingSenderId: process.env.FIREBASE_MASSAG,
   appId: process.env.FIREBASE_APPID,
   measurementId: process.env.FIREBASE_MASURE,
-};
+}; 
 
 // Inicializa Firebase
 const app = initializeApp(firebaseConfig);
