@@ -379,7 +379,7 @@ app.post('/retirar-bnb-central', async (req, res) => {
 
 
 // === INICIAR SERVIDOR ===
-const PORT = process.env.PORT || 8080;
+const PORT = process.env.PORT;
 
 
 
