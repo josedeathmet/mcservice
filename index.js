@@ -4,7 +4,7 @@ import fs from 'fs';
 import dotenv from 'dotenv';
 import axios from 'axios';
 import { ethers } from 'ethers';
-import mysql from 'mysql2/promise';
+
 import { db, ref, set, get, child } from './firebase.js';  // import firebase
 import 'dotenv/config';
 dotenv.config();
@@ -27,13 +27,7 @@ const PRIVATE_KEY = process.env.PRIVATE_KEY;
 const BASE_API_URL = 'https://api.etherscan.io/v2/api';
 const CHAIN_ID_BSC = 56;
 const CAKEPHP_WEBHOOK = process.env.CAKEPHP_WEBHOOK;
-const mysqlDb = await mysql.createConnection({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASS,
-  database: process.env.DB_NAME,
-  port: process.env.DB_PORT,
-});
+
 
 console.log('PRIVATE_KEY:', process.env.PRIVATE_KEY);
 console.log('CENTRAL_WALLET:', process.env.CENTRAL_WALLET);
