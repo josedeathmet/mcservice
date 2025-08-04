@@ -63,6 +63,8 @@ function getLastScannedBlock() {
   }
   return 0;
 }
+
+
 // reorta deposito
 async function reportarADepositoCake(userId, amount, txHash) {
   try {
@@ -371,7 +373,10 @@ app.post('/retirar-bnb-central', async (req, res) => {
 
 
 // === INICIAR SERVIDOR ===
-app.listen(3001, () => {
-  console.log('✅ Microservicio corriendo en http://localhost:3001');
+const PORT = process.env.PORT || 3001;
+
+app.listen(PORT, () => {
+  console.log(`✅ Microservicio corriendo en http://localhost:${PORT}`);
 });
+
    
