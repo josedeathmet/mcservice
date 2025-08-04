@@ -378,12 +378,17 @@ app.post('/retirar-bnb-central', async (req, res) => {
 
 
 // === INICIAR SERVIDOR ===
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 8080;
+
+
+
+
 app.get('/', (req, res) => {
   res.send('✅ Microservicio corriendo correctamente');
 });
 app.listen(PORT, () => {
   console.log(`✅ Microservicio corriendo en http://localhost:${PORT}`);
 });
+
 
    
