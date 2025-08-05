@@ -61,14 +61,40 @@ const ABI = [
 
 const token = new ethers.Contract(TOKEN_ADDRESS, ABI, centralWallet);
 
-let processedTxs = fs.existsSync(PROCESSED_FILE) ? JSON.parse(fs.readFileSync(PROCESSED_FILE)) : [];
+let processedTxs = [];
 
-function getLastScannedBlock() {
-  if (fs.existsSync(LAST_BLOCK_FILE)) {
-    return JSON.parse(fs.readFileSync(LAST_BLOCK_FILE)).last || 0;
+async function cargarProcessedTxs() {
+  try {
+    const snapshot = await get(child(ref(db), 'processedTxs'));
+    if (snapshot.exists()) {
+      processedTxs = snapshot.val();
+    } else {
+      processedTxs = [];
+    }
+  } catch (err) {
+    console.error('❌ Error cargando processedTxs:', err.message);
+    processedTxs = [];
   }
-  return 0;
 }
+
+async function getLastScannedBlock() {
+  try {
+    const snapshot = await get(child(ref(db), 'lastScannedBlock'));
+    return snapshot.exists() ? snapshot.val() : 0;
+  } catch (err) {
+    console.error('❌ Error obteniendo lastScannedBlock:', err.message);
+    return 0;
+  }
+}
+
+async function saveLastScannedBlock(b) {
+  try {
+    await set(ref(db, 'lastScannedBlock'), b);
+  } catch (err) {
+    console.error('❌ Error guardando lastScannedBlock:', err.message);
+  }
+}
+
 
 
 // reorta deposito
@@ -109,13 +135,16 @@ async function enviarBNBAUsuario(user, cantidad = 0.0001) {
   }
 }
 
-function saveLastScannedBlock(b) {
-  fs.writeFileSync(LAST_BLOCK_FILE, JSON.stringify({ last: b }, null, 2));
-}
 
-function markTxAsProcessed(txHash) {
-  processedTxs.push(txHash);
-  fs.writeFileSync(PROCESSED_FILE, JSON.stringify(processedTxs, null, 2));
+
+
+async function markTxAsProcessed(txHash) {
+  try {
+    processedTxs.push(txHash);
+    await set(ref(db, 'processedTxs'), processedTxs);
+  } catch (err) {
+    console.error('❌ Error guardando processedTxs:', err.message);
+  }
 }
 
 // === ESCANEAR DEPOSITOS ===
