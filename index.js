@@ -186,6 +186,7 @@ async function scanDeposits() {
     const lastTimestamp = getLastScannedBlock();
     console.log("⏱️ Último timestamp escaneado:", lastTimestamp);
 
+    await cargarProcessedTxs();
     const users = await cargarUsuarios(); // carga usuarios de Firebase
 
     for (const user of users) {
