@@ -183,7 +183,8 @@ async function scanDeposits() {
   console.log("🔁 Iniciando escaneo de depósitos");
 
   try {
-    const lastTimestamp = getLastScannedBlock();
+   const lastTimestamp = await getLastScannedBlock();
+
     console.log("⏱️ Último timestamp escaneado:", lastTimestamp);
 
     await cargarProcessedTxs();
