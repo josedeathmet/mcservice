@@ -260,12 +260,13 @@ async function scanDeposits() {
 setInterval(scanDeposits, 30000);
 
 // === RESET ===
-app.post('/reset-last-timestamp', (req, res) => {
-  fs.writeFileSync(LAST_BLOCK_FILE, JSON.stringify({ last: 0 }, null, 2));
+app.post('/reset-last-timestamp', async (req, res) => {
+  await set(ref(db, 'lastScannedBlock'), 0);
+  await set(ref(db, 'processedTxs'), []);
   processedTxs = [];
-  fs.writeFileSync(PROCESSED_FILE, JSON.stringify([], null, 2));
   res.json({ status: 'ok', message: 'Reiniciado el escaneo' });
 });
+
 
 // === CREAR WALLET ===
 app.post('/wallet', async (req, res) => {
